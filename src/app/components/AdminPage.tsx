@@ -22,10 +22,14 @@ export function AdminPage() {
   const [previewId, setPreviewId] = useState<number | null>(null);
 
   const approve = (id: number) =>
-    setSubs((prev) => prev.map((s) => (s.id === id ? { ...s, status: "approved" } : s)));
+    setSubs((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, status: "approved" } : s)),
+    );
 
   const reject = (id: number) =>
-    setSubs((prev) => prev.map((s) => (s.id === id ? { ...s, status: "rejected" } : s)));
+    setSubs((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, status: "rejected" } : s)),
+    );
 
   const startEdit = (sub: Submission) => {
     setEditingId(sub.id);
@@ -34,12 +38,13 @@ export function AdminPage() {
 
   const saveEdit = (id: number) => {
     setSubs((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, title: editTitle } : s))
+      prev.map((s) => (s.id === id ? { ...s, title: editTitle } : s)),
     );
     setEditingId(null);
   };
 
-  const filtered = filter === "semua" ? subs : subs.filter((s) => s.status === filter);
+  const filtered =
+    filter === "semua" ? subs : subs.filter((s) => s.status === filter);
   const counts = {
     semua: subs.length,
     pending: subs.filter((s) => s.status === "pending").length,
@@ -49,12 +54,13 @@ export function AdminPage() {
 
   const previewSub = subs.find((s) => s.id === previewId);
 
-  const STATUS_FILTERS: { key: StatusFilter; label: string; color: string }[] = [
-    { key: "semua", label: "Semua", color: "" },
-    { key: "pending", label: "Menunggu", color: "text-amber-600" },
-    { key: "approved", label: "Disetujui", color: "text-emerald-600" },
-    { key: "rejected", label: "Ditolak", color: "text-red-600" },
-  ];
+  const STATUS_FILTERS: { key: StatusFilter; label: string; color: string }[] =
+    [
+      { key: "semua", label: "Semua", color: "" },
+      { key: "pending", label: "Menunggu", color: "text-amber-600" },
+      { key: "approved", label: "Disetujui", color: "text-emerald-600" },
+      { key: "rejected", label: "Ditolak", color: "text-red-600" },
+    ];
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
@@ -73,19 +79,39 @@ export function AdminPage() {
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <StatCard label="Total Pengajuan" value={counts.semua} color="text-foreground" bg="bg-card" />
-        <StatCard label="Menunggu Review" value={counts.pending} color="text-amber-600" bg="bg-amber-50 border-amber-200" />
-        <StatCard label="Disetujui" value={counts.approved} color="text-emerald-600" bg="bg-emerald-50 border-emerald-200" />
-        <StatCard label="Ditolak" value={counts.rejected} color="text-red-600" bg="bg-red-50 border-red-200" />
+        <StatCard
+          label="Total Pengajuan"
+          value={counts.semua}
+          color="text-foreground"
+          bg="bg-card"
+        />
+        <StatCard
+          label="Menunggu Review"
+          value={counts.pending}
+          color="text-amber-600"
+          bg="bg-amber-50 border-amber-200"
+        />
+        <StatCard
+          label="Disetujui"
+          value={counts.approved}
+          color="text-emerald-600"
+          bg="bg-emerald-50 border-emerald-200"
+        />
+        <StatCard
+          label="Ditolak"
+          value={counts.rejected}
+          color="text-red-600"
+          bg="bg-red-50 border-red-200"
+        />
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-1 bg-card rounded-xl border border-border p-1 mb-6 w-fit">
+      <div className="flex items-center gap-1 bg-card rounded-xl border border-border p-1 mb-6 overflow-x-auto w-full">
         {STATUS_FILTERS.map(({ key, label, color }) => (
           <button
             key={key}
             onClick={() => setFilter(key)}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm transition-all ${
+            className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm whitespace-nowrap transition-all ${
               filter === key
                 ? "bg-primary text-primary-foreground shadow"
                 : `text-muted-foreground hover:text-foreground ${color}`
@@ -105,7 +131,8 @@ export function AdminPage() {
 
       {/* Table */}
       <div className="bg-card rounded-2xl border border-border overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+        {/* Desktop Table */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/50">
@@ -161,7 +188,9 @@ export function AdminPage() {
                         </button>
                       </div>
                     ) : (
-                      <p className="font-medium text-foreground line-clamp-2">{sub.title}</p>
+                      <p className="font-medium text-foreground line-clamp-2">
+                        {sub.title}
+                      </p>
                     )}
                   </td>
                   <td className="px-4 py-4 text-muted-foreground text-xs max-w-32">
@@ -222,7 +251,9 @@ export function AdminPage() {
                       )}
                       {sub.status !== "pending" && (
                         <ActionBtn
-                          onClick={() => setPreviewId(previewId === sub.id ? null : sub.id)}
+                          onClick={() =>
+                            setPreviewId(previewId === sub.id ? null : sub.id)
+                          }
                           icon={<Eye className="w-4 h-4" />}
                           label="Lihat"
                           color="bg-muted text-muted-foreground hover:bg-secondary"
@@ -234,6 +265,87 @@ export function AdminPage() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="sm:hidden divide-y divide-border">
+          {filtered.map((sub) => (
+            <div key={sub.id} className="p-4 space-y-3">
+              <div>
+                <p className="font-semibold text-foreground text-sm line-clamp-2">
+                  {sub.title}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {sub.organizer}
+                </p>
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <CategoryBadge cat={sub.category} />
+                <StatusBadge status={sub.status} />
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <p className="text-muted-foreground">Biaya</p>
+                  {sub.isFree ? (
+                    <span className="flex items-center gap-1 text-xs font-bold text-emerald-700">
+                      <Zap className="w-3 h-3" />
+                      GRATIS
+                    </span>
+                  ) : (
+                    <span className="text-orange-700">
+                      Rp {sub.registrationFee.toLocaleString("id-ID")}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Deadline</p>
+                  <p className="text-foreground">
+                    {formatDeadline(sub.deadline)}
+                  </p>
+                </div>
+              </div>
+              <div className="border-t border-border pt-3">
+                <p className="text-xs text-muted-foreground mb-1">
+                  Pengaju: {sub.submittedBy}
+                </p>
+                <p className="text-xs opacity-60">{sub.submittedAt}</p>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                {sub.status === "pending" && (
+                  <>
+                    <ActionBtn
+                      onClick={() => approve(sub.id)}
+                      icon={<CheckCircle2 className="w-4 h-4" />}
+                      label="Approve"
+                      color="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 flex-1"
+                    />
+                    <ActionBtn
+                      onClick={() => reject(sub.id)}
+                      icon={<XCircle className="w-4 h-4" />}
+                      label="Reject"
+                      color="bg-red-100 text-red-700 hover:bg-red-200 flex-1"
+                    />
+                    <ActionBtn
+                      onClick={() => startEdit(sub)}
+                      icon={<Edit3 className="w-4 h-4" />}
+                      label="Edit"
+                      color="bg-blue-100 text-blue-700 hover:bg-blue-200 flex-1"
+                    />
+                  </>
+                )}
+                {sub.status !== "pending" && (
+                  <ActionBtn
+                    onClick={() =>
+                      setPreviewId(previewId === sub.id ? null : sub.id)
+                    }
+                    icon={<Eye className="w-4 h-4" />}
+                    label="Lihat Detail"
+                    color="bg-muted text-muted-foreground hover:bg-secondary flex-1"
+                  />
+                )}
+              </div>
+            </div>
+          ))}
         </div>
 
         {filtered.length === 0 && (
@@ -268,7 +380,10 @@ export function AdminPage() {
                   : `Rp ${previewSub.registrationFee.toLocaleString("id-ID")}`
               }
             />
-            <Detail label="Deadline" value={formatDeadline(previewSub.deadline)} />
+            <Detail
+              label="Deadline"
+              value={formatDeadline(previewSub.deadline)}
+            />
             <Detail label="Pengaju" value={previewSub.submittedBy} />
           </div>
         </div>
@@ -309,7 +424,9 @@ function CategoryBadge({ cat }: { cat: string }) {
     Akademik: "bg-teal-100 text-teal-700",
   };
   return (
-    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${colors[cat] || "bg-gray-100 text-gray-700"}`}>
+    <span
+      className={`text-xs px-2 py-0.5 rounded-full font-medium ${colors[cat] || "bg-gray-100 text-gray-700"}`}
+    >
       {cat}
     </span>
   );
@@ -330,10 +447,10 @@ function ActionBtn({
     <button
       onClick={onClick}
       title={label}
-      className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${color}`}
+      className={`flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${color}`}
     >
       {icon}
-      <span className="hidden xl:inline">{label}</span>
+      <span className="hidden sm:inline">{label}</span>
     </button>
   );
 }
