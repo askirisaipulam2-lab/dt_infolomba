@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Competition } from "./data";
 import { getDaysUntil, formatDeadline, categoryColor } from "./utils";
+import { RegistrationForm, RegistrationData } from "./RegistrationForm";
 
 type Props = {
   competition: Competition;
@@ -27,9 +28,10 @@ type Props = {
 export function DetailPage({ competition: c, onBack }: Props) {
   const [isSaved, setIsSaved] = useState(c.savedByUser);
   const [hasReminder, setHasReminder] = useState(false);
-  const [activeTab, setActiveTab] = useState<"deskripsi" | "syarat" | "benefit">(
-    "deskripsi"
-  );
+  const [activeTab, setActiveTab] = useState<
+    "deskripsi" | "syarat" | "benefit"
+  >("deskripsi");
+  const [showRegistration, setShowRegistration] = useState(false);
 
   const daysLeft = getDaysUntil(c.deadline);
   const isUrgent = daysLeft >= 0 && daysLeft <= 3;
@@ -67,16 +69,24 @@ export function DetailPage({ competition: c, onBack }: Props) {
                 : "border-orange-300 bg-orange-50"
             }`}
           >
-            <p className="text-xs text-muted-foreground mb-1">Biaya Pendaftaran</p>
+            <p className="text-xs text-muted-foreground mb-1">
+              Biaya Pendaftaran
+            </p>
             {c.isFree ? (
               <div className="flex items-center gap-2">
                 <Zap className="w-5 h-5 text-emerald-600" />
-                <span className="text-emerald-700 font-bold" style={{ fontSize: "1.2rem" }}>
+                <span
+                  className="text-emerald-700 font-bold"
+                  style={{ fontSize: "1.2rem" }}
+                >
                   GRATIS · Rp 0
                 </span>
               </div>
             ) : (
-              <span className="text-orange-700 font-bold" style={{ fontSize: "1.2rem" }}>
+              <span
+                className="text-orange-700 font-bold"
+                style={{ fontSize: "1.2rem" }}
+              >
                 Rp {c.registrationFee.toLocaleString("id-ID")}
               </span>
             )}
@@ -88,11 +98,13 @@ export function DetailPage({ competition: c, onBack }: Props) {
               isUrgent
                 ? "border-red-400 bg-red-50"
                 : isWarning
-                ? "border-amber-400 bg-amber-50"
-                : "border-border bg-card"
+                  ? "border-amber-400 bg-amber-50"
+                  : "border-border bg-card"
             }`}
           >
-            <p className="text-xs text-muted-foreground mb-1">Batas Pendaftaran</p>
+            <p className="text-xs text-muted-foreground mb-1">
+              Batas Pendaftaran
+            </p>
             <div className="flex items-center gap-2">
               <Clock
                 className={`w-4 h-4 ${isUrgent ? "text-red-600" : isWarning ? "text-amber-600" : "text-muted-foreground"}`}
@@ -114,17 +126,33 @@ export function DetailPage({ competition: c, onBack }: Props) {
               </div>
             )}
             {!isUrgent && !isWarning && daysLeft >= 0 && (
-              <p className="text-xs text-muted-foreground mt-1">H-{daysLeft} hari lagi</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                H-{daysLeft} hari lagi
+              </p>
             )}
           </div>
 
           {/* Quick Info */}
           <div className="bg-card rounded-xl border border-border p-4 space-y-3">
-            <InfoRow icon={<Building2 className="w-4 h-4" />} label="Penyelenggara" value={c.organizer} />
-            <InfoRow icon={<Users className="w-4 h-4" />} label="Peserta" value={c.participants} />
-            <InfoRow icon={<Trophy className="w-4 h-4" />} label="Total Hadiah" value={c.prizes} />
+            <InfoRow
+              icon={<Building2 className="w-4 h-4" />}
+              label="Penyelenggara"
+              value={c.organizer}
+            />
+            <InfoRow
+              icon={<Users className="w-4 h-4" />}
+              label="Peserta"
+              value={c.participants}
+            />
+            <InfoRow
+              icon={<Trophy className="w-4 h-4" />}
+              label="Total Hadiah"
+              value={c.prizes}
+            />
             <div>
-              <p className="text-xs text-muted-foreground mb-1.5">Prodi yang Relevan</p>
+              <p className="text-xs text-muted-foreground mb-1.5">
+                Prodi yang Relevan
+              </p>
               <div className="flex flex-wrap gap-1">
                 {c.prodi.map((p) => (
                   <span
@@ -140,9 +168,12 @@ export function DetailPage({ competition: c, onBack }: Props) {
 
           {/* Action Buttons */}
           <div className="space-y-2">
-            <button className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-xl font-medium hover:opacity-90 transition-opacity">
+            <button
+              onClick={() => setShowRegistration(true)}
+              className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-xl font-medium hover:opacity-90 transition-opacity"
+            >
               <ExternalLink className="w-4 h-4" />
-              Daftar Lomba (Situs Panitia)
+              Daftar Sekarang
             </button>
             <button className="w-full flex items-center justify-center gap-2 bg-secondary text-secondary-foreground py-3 rounded-xl font-medium hover:bg-secondary/80 transition-colors border border-border">
               <Download className="w-4 h-4" />
@@ -188,7 +219,9 @@ export function DetailPage({ competition: c, onBack }: Props) {
           {/* Header */}
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-3">
-              <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${categoryColor(c.category)}`}>
+              <span
+                className={`text-xs font-medium px-2.5 py-1 rounded-full ${categoryColor(c.category)}`}
+              >
                 {c.category}
               </span>
               {c.isFree && (
@@ -233,14 +266,17 @@ export function DetailPage({ competition: c, onBack }: Props) {
                   {tab === "deskripsi"
                     ? "Deskripsi"
                     : tab === "syarat"
-                    ? "Syarat & Ketentuan"
-                    : "Benefit & Hadiah"}
+                      ? "Syarat & Ketentuan"
+                      : "Benefit & Hadiah"}
                 </button>
               ))}
             </div>
             <div className="p-5">
               {activeTab === "deskripsi" && (
-                <p className="text-muted-foreground leading-relaxed" style={{ fontSize: "0.9rem" }}>
+                <p
+                  className="text-muted-foreground leading-relaxed"
+                  style={{ fontSize: "0.9rem" }}
+                >
                   {c.description}
                 </p>
               )}
@@ -249,9 +285,13 @@ export function DetailPage({ competition: c, onBack }: Props) {
                   {c.requirements.map((req, i) => (
                     <li key={i} className="flex items-start gap-3">
                       <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-none mt-0.5">
-                        <span className="text-primary text-xs font-bold">{i + 1}</span>
+                        <span className="text-primary text-xs font-bold">
+                          {i + 1}
+                        </span>
                       </div>
-                      <span className="text-sm text-muted-foreground">{req}</span>
+                      <span className="text-sm text-muted-foreground">
+                        {req}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -273,9 +313,12 @@ export function DetailPage({ competition: c, onBack }: Props) {
           <div className="flex items-center gap-4 bg-indigo-50 border border-indigo-200 rounded-xl p-4">
             <Calendar className="w-8 h-8 text-primary flex-none" />
             <div className="flex-1">
-              <p className="text-sm font-medium text-foreground">Simpan ke Kalender Saya</p>
+              <p className="text-sm font-medium text-foreground">
+                Simpan ke Kalender Saya
+              </p>
               <p className="text-xs text-muted-foreground">
-                Tandai deadline {formatDeadline(c.deadline)} di kalender agar tidak terlewat
+                Tandai deadline {formatDeadline(c.deadline)} di kalender agar
+                tidak terlewat
               </p>
             </div>
             <button
@@ -288,6 +331,22 @@ export function DetailPage({ competition: c, onBack }: Props) {
           </div>
         </div>
       </div>
+
+      {/* Registration Form Modal */}
+      {showRegistration && (
+        <RegistrationForm
+          competition={c}
+          onClose={() => setShowRegistration(false)}
+          onSubmit={(formData) => {
+            console.log("Registration submitted:", formData);
+            // Handle registration submission here
+            alert(
+              `Pendaftaran untuk "${c.title}" berhasil diajukan!\nData tim: ${formData.teamName}`,
+            );
+            setShowRegistration(false);
+          }}
+        />
+      )}
     </div>
   );
 }

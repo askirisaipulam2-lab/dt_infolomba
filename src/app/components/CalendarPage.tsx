@@ -10,7 +10,8 @@ type Props = {
   onCompetitionClick: (c: Competition) => void;
 };
 
-const TODAY = new Date("2026-06-02");
+// Selalu gunakan tanggal hari ini secara dinamis
+const TODAY = new Date();
 
 export function CalendarPage({ competitions, onCompetitionClick }: Props) {
   const [currentMonth, setCurrentMonth] = useState(TODAY);
