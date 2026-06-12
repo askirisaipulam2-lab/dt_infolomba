@@ -8,7 +8,6 @@ import {
   Menu,
   X,
   Bell,
-  Search,
   LogOut,
 } from "lucide-react";
 import {
@@ -44,6 +43,7 @@ interface Notification {
   read: boolean;
 }
 
+// Menambahkan "submit" dan "admin" ke tipe halaman resmi
 type Page = "home" | "calendar" | "team" | "submit" | "admin" | "detail";
 type Role = "mahasiswa" | "admin";
 
@@ -73,7 +73,7 @@ const ALL_NAV_ITEMS = [
     roles: ["mahasiswa"],
   },
   {
-    id: "submit",
+    id: "admin", // Diubah ke 'admin' agar mengarah langsung ke panel admin
     label: "Tambahkan Lomba",
     icon: PlusCircle,
     roles: ["admin"],
@@ -90,12 +90,15 @@ export default function App() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [competitionsList, setCompetitionsList] =
     useState<Competition[]>(initialCompetitions);
+  
+  const [searchQuery, setSearchQuery] = useState("");
+
   const [notifications, setNotifications] = useState<Notification[]>([
     {
       id: 1,
       title: "Lomba Baru Ditambahkan",
       message:
-        "Hackathon 2024 - Coding Competition telah ditambahkan ke platform.",
+        "Hackathon 2026 - Coding Competition telah ditambahkan ke platform.",
       timestamp: new Date(Date.now() - 3600000),
       type: "success",
       read: false,
@@ -175,8 +178,10 @@ export default function App() {
 
   const handleLogout = () => {
     setUser(null);
+    setShowLogin(false); // Reset juga status login-nya
     setCurrentPage("home");
     setSelectedComp(null);
+    setSearchQuery("");
   };
 
   if (!user) {
@@ -207,11 +212,19 @@ export default function App() {
     (item.roles as readonly Role[]).includes(user.role),
   );
 
+  const filteredCompetitions = competitionsList.filter((c) => {
+    const q = searchQuery.toLowerCase();
+    return (
+      c.title.toLowerCase().includes(q) ||
+      c.organizer.toLowerCase().includes(q) ||
+      c.tags.some((t) => t.toLowerCase().includes(q))
+    );
+  });
+
   return (
     <div className="min-h-screen bg-background">
-      {/* MARKER-MAKE-KIT-INVOKED */}
       {/* Top Navigation */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-border shadow-sm">
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-b-border shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center h-16 gap-4">
             {/* Logo */}
@@ -222,7 +235,7 @@ export default function App() {
               <div className="w-8 h-8 bg-primary rounded-xl flex items-center justify-center shadow-sm">
                 <Trophy className="w-4 h-4 text-white" />
               </div>
-              <div className="hidden sm:block">
+              <div className="hidden sm:block text-left">
                 <span className="font-bold text-foreground">LombaKu</span>
                 <span className="text-xs text-muted-foreground block -mt-1">
                   {user.role === "admin"
@@ -236,7 +249,7 @@ export default function App() {
             <nav className="hidden md:flex items-center gap-0.5 mx-auto">
               {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
                 <button
-                  key={id}
+                  key={label} // Menggunakan label sebagai key unik menghindari konflik ID duplikat
                   onClick={() => navigate(id as Page)}
                   className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all ${
                     isNavActive(id)
@@ -251,15 +264,13 @@ export default function App() {
             </nav>
 
             {/* Right Controls */}
-            <div className="flex items-center gap-2 ml-auto">
+            <div className="flex items-center gap-2 sm:gap-3 ml-auto flex-1 justify-end max-w-sm sm:max-w-md md:max-w-none">
               {user.role === "mahasiswa" && (
                 <>
-                  <button className="hidden md:flex w-9 h-9 rounded-xl border border-border items-center justify-center text-muted-foreground hover:bg-secondary transition-colors">
-                    <Search className="w-4 h-4" />
-                  </button>
+                  {/* Tombol Notifikasi */}
                   <button
                     onClick={() => setShowNotifications(true)}
-                    className="relative w-9 h-9 rounded-xl border border-border flex items-center justify-center text-muted-foreground hover:bg-secondary transition-colors"
+                    className="relative w-9 h-9 rounded-xl border border-border flex items-center justify-center text-muted-foreground hover:bg-secondary transition-colors shrink-0"
                   >
                     <Bell className="w-4 h-4" />
                     {notifications.filter((n) => !n.read).length > 0 && (
@@ -273,9 +284,11 @@ export default function App() {
                   </button>
                 </>
               )}
+              
+              {/* Profile Dialog */}
               <Dialog>
                 <DialogTrigger asChild>
-                  <button className="hidden md:flex items-center gap-2 pl-2 border-l border-border">
+                  <button className="hidden md:flex items-center gap-2 pl-2 border-l border-border shrink-0">
                     <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">
                       {user.initials}
                     </div>
@@ -325,7 +338,7 @@ export default function App() {
 
                   <DialogFooter>
                     <div className="w-full flex justify-between">
-                      <DialogClose>
+                      <DialogClose asChild>
                         <button className="px-3 py-2 rounded-lg bg-secondary">
                           Tutup
                         </button>
@@ -340,33 +353,31 @@ export default function App() {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
+
               <button
                 onClick={handleLogout}
-                className="hidden md:flex w-9 h-9 rounded-xl border border-border items-center justify-center text-red-500 hover:bg-red-50 transition-colors ml-2"
+                className="hidden md:flex w-9 h-9 rounded-xl border border-border items-center justify-center text-red-500 hover:bg-red-50 transition-colors ml-1 shrink-0"
                 title="Logout"
               >
                 <LogOut className="w-4 h-4" />
               </button>
+
               {/* Mobile Hamburger */}
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
-                className="md:hidden w-9 h-9 rounded-xl border border-border flex items-center justify-center text-muted-foreground"
+                className="md:hidden w-9 h-9 rounded-xl border border-border flex items-center justify-center text-muted-foreground shrink-0"
               >
-                {mobileOpen ? (
-                  <X className="w-4 h-4" />
-                ) : (
-                  <Menu className="w-4 h-4" />
-                )}
+                {mobileOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
           {/* Mobile Dropdown Menu */}
           {mobileOpen && (
-            <div className="md:hidden border-t border-border py-3 space-y-1">
+            <div className="md:hidden border-t border-border py-3 space-y-2">
               {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
                 <button
-                  key={id}
+                  key={label}
                   onClick={() => navigate(id as Page)}
                   className={`flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm transition-all ${isNavActive(id) ? "bg-primary text-primary-foreground font-medium" : "text-muted-foreground hover:bg-secondary"}`}
                 >
@@ -420,14 +431,11 @@ export default function App() {
                       <p className="text-sm">
                         <strong>Kontak:</strong> {user.phone ?? "-"}
                       </p>
-                      <p className="text-sm">
-                        Berikut ringkasan profil singkat Anda.
-                      </p>
                     </div>
 
                     <DialogFooter>
                       <div className="w-full flex justify-between">
-                        <DialogClose>
+                        <DialogClose asChild>
                           <button className="px-3 py-2 rounded-lg bg-secondary">
                             Tutup
                           </button>
@@ -458,13 +466,14 @@ export default function App() {
       <main>
         {currentPage === "home" && (
           <HomePage
-            competitions={competitionsList}
+            competitions={filteredCompetitions} // Menggunakan data hasil filter pencarian
+            searchQuery={searchQuery}
             onCompetitionClick={openDetail}
           />
         )}
         {currentPage === "calendar" && (
           <CalendarPage
-            competitions={competitionsList}
+            competitions={filteredCompetitions}
             onCompetitionClick={openDetail}
           />
         )}
@@ -501,7 +510,7 @@ export default function App() {
             const active = isNavActive(id);
             return (
               <button
-                key={id}
+                key={label}
                 onClick={() => navigate(id as Page)}
                 className={`flex flex-col items-center gap-1 px-2 py-1.5 rounded-xl transition-all ${active ? "text-primary" : "text-muted-foreground"}`}
               >
